@@ -33,11 +33,13 @@ jobs:
       - name: Post expired entries to step summary
         if: failure()
         run: |
-          echo "## ❌ Quarantine registry validation failed" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "One or more entries in \`.github/flaky-tests-quarantine.json\` are expired or invalid." >> $GITHUB_STEP_SUMMARY
-          echo "Fix or extend them and push to unblock CI." >> $GITHUB_STEP_SUMMARY
-          node scripts/validate-flaky-quarantine.mjs --allow-expired 2>&1 >> $GITHUB_STEP_SUMMARY || true
+          {
+            echo "## ❌ Quarantine registry validation failed"
+            echo ""
+            echo "One or more entries in \`.github/flaky-tests-quarantine.json\` are expired or invalid."
+            echo "Fix or extend them and push to unblock CI."
+          } >> "$GITHUB_STEP_SUMMARY"
+          node scripts/validate-flaky-quarantine.mjs --allow-expired >> "$GITHUB_STEP_SUMMARY" 2>&1 || true
 
   # ─── Step 2: Generate weekly aggregation report ───────────────────────────
   weekly-report:
@@ -74,10 +76,10 @@ jobs:
         if: always()
         run: |
           if [ -f "reports/flake/weekly-summary.md" ]; then
-            cat reports/flake/weekly-summary.md >> $GITHUB_STEP_SUMMARY
+            cat reports/flake/weekly-summary.md >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "## Flaky Test Report" >> $GITHUB_STEP_SUMMARY
-            echo "No flake data collected this week — no CI runs with JSON results found." >> $GITHUB_STEP_SUMMARY
+            echo "## Flaky Test Report" >> "$GITHUB_STEP_SUMMARY"
+            echo "No flake data collected this week — no CI runs with JSON results found." >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Upload weekly report artifact
@@ -109,11 +111,11 @@ jobs:
         run: |
           echo "Checking for expired quarantine entries..."
           node scripts/validate-flaky-quarantine.mjs
-          echo "## ✅ No expired quarantine entries" >> $GITHUB_STEP_SUMMARY
+          echo "## ✅ No expired quarantine entries" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Annotate expired entries
         if: failure()
         run: |
           echo "::error file=.github/flaky-tests-quarantine.json::One or more quarantine entries are expired. Fix or extend them."
-          echo "## ❌ Expired quarantine entries found" >> $GITHUB_STEP_SUMMARY
-          echo "Run \`node scripts/validate-flaky-quarantine.mjs\` locally for details." >> $GITHUB_STEP_SUMMARY
+          echo "## ❌ Expired quarantine entries found" >> "$GITHUB_STEP_SUMMARY"
+          echo "Run \`node scripts/validate-flaky-quarantine.mjs\` locally for details." >> "$GITHUB_STEP_SUMMARY"
