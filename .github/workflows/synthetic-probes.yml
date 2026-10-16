@@ -58,6 +58,8 @@ jobs:
         if: failure()
         run: |
           echo "::error title=Synthetic Probe Failure::The staging critical-journey probe failed. See docs/synthetic-probes-policy.md#failure-triage."
-          echo "### 🚨 Synthetic Probe Failure" >> $GITHUB_STEP_SUMMARY
-          echo "The hourly staging synthetic probe (auth -> create -> deposit -> release) failed." >> $GITHUB_STEP_SUMMARY
-          echo "Check the uploaded results artifact for which step broke, and see docs/synthetic-probes-policy.md#failure-triage for the runbook." >> $GITHUB_STEP_SUMMARY
+          {
+            echo "### 🚨 Synthetic Probe Failure"
+            echo "The hourly staging synthetic probe (auth -> create -> deposit -> release) failed."
+            echo "Check the uploaded results artifact for which step broke, and see docs/synthetic-probes-policy.md#failure-triage for the runbook."
+          } >> "$GITHUB_STEP_SUMMARY"

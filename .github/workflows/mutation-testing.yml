@@ -70,12 +70,14 @@ jobs:
               const t = r.mutationScore ?? r.metrics?.mutationScore ?? 'unknown';
               console.log(t);
             " 2>/dev/null || echo "unknown")
-            echo "## Mutation score: ${SCORE}%" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Pilot modules: \`feeComputation.ts\` + \`lossAllocation.ts\`" >> $GITHUB_STEP_SUMMARY
-            echo "Report artifact: mutation-report-money-math-${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "See \`docs/mutation-testing-baseline.md\` for triage instructions." >> $GITHUB_STEP_SUMMARY
+            {
+              echo "## Mutation score: ${SCORE}%"
+              echo ""
+              echo "Pilot modules: \`feeComputation.ts\` + \`lossAllocation.ts\`"
+              echo "Report artifact: mutation-report-money-math-${{ github.run_number }}"
+              echo ""
+              echo "See \`docs/mutation-testing-baseline.md\` for triage instructions."
+            } >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "Mutation report not found." >> $GITHUB_STEP_SUMMARY
+            echo "Mutation report not found." >> "$GITHUB_STEP_SUMMARY"
           fi

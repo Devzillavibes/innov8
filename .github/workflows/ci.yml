@@ -133,7 +133,7 @@ jobs:
             --results jest-results.json \
             --registry ../.github/flaky-tests-quarantine.json \
             --output ../reports/flake/frontend-${{ github.run_number }}.json \
-            --scope frontend | tee -a $GITHUB_STEP_SUMMARY
+            --scope frontend | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Fail if tests failed (deferred from --json run)
         if: needs.changes.outputs.frontend == 'true'
@@ -271,11 +271,16 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install ts-node
-        run: npm install -g ts-node typescript --prefer-offline
+      # ts-node (last released 2022, effectively unmaintained) crashes when an
+      # unpinned `npm install -g typescript` picks up a new TypeScript major
+      # whose internal `ts.sys` shape it doesn't know about. tsx uses esbuild
+      # to strip types instead of the TypeScript compiler API, so it isn't
+      # coupled to TypeScript's internals and keeps working across upgrades.
+      - name: Install tsx
+        run: npm install -g tsx --prefer-offline
 
       - name: Run catalog drift check
-        run: ts-node --skip-project scripts/check-flag-catalog-drift.ts
+        run: tsx scripts/check-flag-catalog-drift.ts
 
   backend:
     name: Backend Required Gate
@@ -320,7 +325,7 @@ jobs:
             --results jest-results.json \
             --registry ../.github/flaky-tests-quarantine.json \
             --output ../reports/flake/backend-${{ github.run_number }}.json \
-            --scope backend | tee -a $GITHUB_STEP_SUMMARY
+            --scope backend | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Fail if tests failed (deferred from --json run)
         if: needs.changes.outputs.backend == 'true'
@@ -479,7 +484,7 @@ jobs:
         run: |
           UDID=$(xcrun simctl list devices available | grep "iPhone 15" | grep "17.5" | head -1 | grep -E -o '\([-A-F0-9]+\)' | tr -d '()')
           xcrun simctl boot "$UDID" || true
-          echo "SIMULATOR_UDID=$UDID" >> $GITHUB_ENV
+          echo "SIMULATOR_UDID=$UDID" >> "$GITHUB_ENV"
 
       - name: Run Detox smoke tests (iOS)
         run: pnpm test:e2e:ios
@@ -642,7 +647,7 @@ jobs:
           if [ -f "$WASM_FILE" ]; then
             WASM_HASH=$(sha256sum "$WASM_FILE" | cut -d' ' -f1)
             echo "WASM ABI hash: $WASM_HASH"
-            echo "WASM_ABI_HASH=$WASM_HASH" >> $GITHUB_ENV
+            echo "WASM_ABI_HASH=$WASM_HASH" >> "$GITHUB_ENV"
           else
             echo "ERROR: WASM artifact not found at $WASM_FILE"
             exit 1
